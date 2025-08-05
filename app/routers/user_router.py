@@ -1,10 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from app.models.user_model import users
-from app.schemas.user_schema import UserCreateRequestSchema
+from app.schemas.user_schema import UserCreateRequestSchema, UserFetchRequestSchema
 from app.utils.password import hash_password
 from uuid import uuid4
 from app.utils.email_utils import send_verification_email
 from app.config.mailer import Mailer
+from app.utils.password import verify_password
+from pydantic import EmailStr
 
 mailer = Mailer()
 router = APIRouter()
@@ -44,7 +46,7 @@ async def create_user(user: UserCreateRequestSchema):
     return{"message": "User created successfully"}
 
 @router.get("/v1/verify_account")
-async def verify_account(token:str):
+async def verify_account(token: str):
     print(token)
     user = await users.find_one({"verification_token": token})
     print(user)
@@ -56,3 +58,25 @@ async def verify_account(token:str):
     await user.save()
     
     return {"message": "Account verified successfully"}
+
+@router.get("/v1/user")
+async def get_user(email:EmailStr, password:str):
+    user = await users.find_one(users.email == email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if not user.is_verified:
+        subject, body, html_body = send_verification_email(user.verification_token)
+        mailer.send_email(
+            to_email=email,
+            subject=subject,
+            body_text=body,
+            body_html=html_body
+        )
+        raise HTTPException(status_code=403, detail="User account not verified, verification email sent")
+    
+    res = verify_password(password, user.password)
+    if not res:
+        raise HTTPException(status_code=401, detail="Invalid password")
+    return {"message": "User fetched successfully"}
+    
