@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.models.user_model import users
-from app.schemas.user_schema import UserCreateRequestSchema, UserFetchRequestSchema
+from app.schemas.user_schema import UserCreateRequestSchema
 from app.utils.password import hash_password
 from uuid import uuid4
 from app.utils.email_utils import send_verification_email
@@ -32,7 +32,7 @@ async def create_user(user: UserCreateRequestSchema):
     
     new_user = await new_user.insert()
     
-    subject, body, html_body = send_verification_email(new_user.verification_token)
+    subject, body, html_body = send_verification_email(user.domain,new_user.verification_token)
     mailer.send_email(
         to_email=new_user.email,
         subject=subject,
@@ -61,13 +61,15 @@ async def verify_account(token: str):
     return {"message": "Account verified successfully"}
 
 @router.get("/v1/user")
-async def get_user(email:EmailStr, password:str, domain:str):
+async def get_user(email:EmailStr, password:str):
     user = await users.find_one(users.email == email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
     if not user.is_verified:
-        subject, body, html_body = send_verification_email(user.verification_token)
+        user.verification_token = str(uuid4())
+        await user.save()
+        subject, body, html_body = send_verification_email(user.domain, user.verification_token)
         mailer.send_email(
             to_email=email,
             subject=subject,
