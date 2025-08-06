@@ -7,6 +7,7 @@ class UserCreateRequestSchema(BaseModel):
     email: EmailStr
     password: str
     phone:Optional[str] = None
+    domain:str
     
 class UserCreateResponseSchema(BaseModel):
     message: str

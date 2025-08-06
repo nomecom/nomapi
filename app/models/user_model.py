@@ -14,6 +14,7 @@ class users(Document):
     is_verified: Optional[bool] = False
     verification_token: str
     phone: Optional[str] = None
+    domain: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     class Settings:
