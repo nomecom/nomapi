@@ -26,6 +26,7 @@ async def create_user(user: UserCreateRequestSchema):
         password=hashed_password,
         phone=user.phone,
         is_verified=False,
+        domain=user.domain,
         verification_token=str(uuid4())
     )
     
@@ -60,7 +61,7 @@ async def verify_account(token: str):
     return {"message": "Account verified successfully"}
 
 @router.get("/v1/user")
-async def get_user(email:EmailStr, password:str):
+async def get_user(email:EmailStr, password:str, domain:str):
     user = await users.find_one(users.email == email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
