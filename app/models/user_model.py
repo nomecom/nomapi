@@ -13,6 +13,9 @@ class users(Document):
     password: str
     is_verified: Optional[bool] = False
     verification_token: str
+    verification_token_expires: Optional[datetime] = None
+    password_reset_token: Optional[str] = None
+    password_reset_token_expires: Optional[datetime] = None
     phone: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
