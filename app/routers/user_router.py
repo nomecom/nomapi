@@ -48,17 +48,21 @@ async def create_user(user: UserCreateRequestSchema):
 
 @router.get("/v1/verify_account")
 async def verify_account(token: str):
-    print(token)
-    user = await users.find_one({"verification_token": token})
-    print(user)
-    if not user:
-        raise HTTPException(status_code=404, detail="Invalid verification token")
-    
-    user.is_verified = True
-    user.verification_token = None
-    await user.save()
-    
-    return {"message": "Account verified successfully"}
+    try:
+            
+        print(token)
+        user = await users.find_one({"verification_token": token})
+        print(user)
+        if not user:
+            raise HTTPException(status_code=404, detail="Invalid verification token")
+        
+        user.is_verified = True
+        user.verification_token = ""
+        await user.save()
+        
+        return {"message": "Account verified successfully"}
+    except Exception as e:
+        raise e
 
 @router.get("/v1/user")
 async def get_user(email:EmailStr, password:str):

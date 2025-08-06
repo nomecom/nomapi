@@ -1,4 +1,4 @@
-def send_verification_email(verification_token: str):
+def send_verification_email(domain:str, verification_token: str):
     subject = "Verify Your Account"
     verification_url = f"http://localhost:5173/verify?token={verification_token}"
     
