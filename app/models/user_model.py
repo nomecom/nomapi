@@ -17,6 +17,7 @@ class users(Document):
     password_reset_token: Optional[str] = None
     password_reset_token_expires: Optional[datetime] = None
     phone: Optional[str] = None
+    domain: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     class Settings:

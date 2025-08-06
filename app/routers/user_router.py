@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.models.user_model import users
-from app.schemas.user_schema import UserCreateRequestSchema, UserFetchRequestSchema
+from app.schemas.user_schema import UserCreateRequestSchema
 from app.utils.password import hash_password
 from uuid import uuid4
 from app.utils.email_utils import send_verification_email, send_password_reset_email
@@ -27,13 +27,18 @@ async def create_user(user: UserCreateRequestSchema):
         password=hashed_password,
         phone=user.phone,
         is_verified=False,
+<<<<<<< HEAD
         verification_token=str(uuid4()),
         verification_token_expires=datetime.utcnow() + timedelta(minutes=10)
+=======
+        domain=user.domain,
+        verification_token=str(uuid4())
+>>>>>>> d648c0b18eb824f3cb2cba8fc442826d52d67273
     )
     
     new_user = await new_user.insert()
     
-    subject, body, html_body = send_verification_email(new_user.verification_token)
+    subject, body, html_body = send_verification_email(user.domain,new_user.verification_token)
     mailer.send_email(
         to_email=new_user.email,
         subject=subject,
@@ -49,6 +54,7 @@ async def create_user(user: UserCreateRequestSchema):
 
 @router.get("/v1/verify_account")
 async def verify_account(token: str):
+<<<<<<< HEAD
     print(token)
     user = await users.find_one({"verification_token": token})
     print(user)
@@ -69,6 +75,23 @@ async def verify_account(token: str):
     await user.save()
     
     return {"message": "Account verified successfully"}
+=======
+    try:
+            
+        print(token)
+        user = await users.find_one({"verification_token": token})
+        print(user)
+        if not user:
+            raise HTTPException(status_code=404, detail="Invalid verification token")
+        
+        user.is_verified = True
+        user.verification_token = ""
+        await user.save()
+        
+        return {"message": "Account verified successfully"}
+    except Exception as e:
+        raise e
+>>>>>>> d648c0b18eb824f3cb2cba8fc442826d52d67273
 
 @router.get("/v1/user")
 async def get_user(email:EmailStr, password:str):
@@ -77,6 +100,7 @@ async def get_user(email:EmailStr, password:str):
         raise HTTPException(status_code=404, detail="User not found")
     
     if not user.is_verified:
+<<<<<<< HEAD
         # Generate new verification token with expiration if current one is expired or doesn't exist
         if not user.verification_token_expires or datetime.utcnow() > user.verification_token_expires:
             user.verification_token = str(uuid4())
@@ -84,6 +108,11 @@ async def get_user(email:EmailStr, password:str):
             await user.save()
         
         subject, body, html_body = send_verification_email(user.verification_token)
+=======
+        user.verification_token = str(uuid4())
+        await user.save()
+        subject, body, html_body = send_verification_email(user.domain, user.verification_token)
+>>>>>>> d648c0b18eb824f3cb2cba8fc442826d52d67273
         mailer.send_email(
             to_email=email,
             subject=subject,
