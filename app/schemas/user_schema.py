@@ -8,7 +8,11 @@ class UserCreateRequestSchema(BaseModel):
     password: str
     phone:Optional[str] = None
     domain:str
-    
+
+class UserSignupRequestSchema(BaseModel):
+    email: EmailStr
+    password: str
+
 class UserCreateResponseSchema(BaseModel):
     message: str
     
