@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from app.models.user_model import users
-from app.schemas.user_schema import UserCreateRequestSchema, UserSignupRequestSchema, ForgotPasswordRequestSchema, ResetPasswordRequestSchema
+from app.schemas.user_schema import UserCreateRequestSchema, UserSigninRequestSchema, ForgotPasswordRequestSchema, ResetPasswordRequestSchema
 from app.utils.password import hash_password
 from uuid import uuid4
 from app.utils.email_utils import send_verification_email, send_password_reset_email
@@ -59,8 +59,7 @@ async def create_user(user: UserCreateRequestSchema):
     hashed_password = hash_password(user.password)
     
     new_user = users(
-        first_name=user.first_name,
-        last_name=user.last_name,
+        full_name=user.full_name,
         email=user.email,
         password=hashed_password,
         phone=user.phone,
@@ -102,8 +101,8 @@ async def verify_account(token: str):
     except Exception as e:
         raise e
 
-@router.post("/v1/signup")
-async def signup(user: UserSignupRequestSchema):
+@router.post("/v1/signin")
+async def signin(user: UserSigninRequestSchema):
     db_user = await users.find_one(users.email == user.email)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")

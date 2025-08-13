@@ -7,8 +7,7 @@ from datetime import datetime, timedelta
 
 class users(Document):
     id: UUID = Field(default_factory=uuid4, alias="_id")
-    first_name: str
-    last_name: str
+    full_name: str
     email: EmailStr
     password: str
     is_verified: Optional[bool] = False

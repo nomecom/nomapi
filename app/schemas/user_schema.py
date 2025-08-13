@@ -2,14 +2,13 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 class UserCreateRequestSchema(BaseModel):
-    first_name: str
-    last_name: str
+    full_name: str
     email: EmailStr
     password: str
     phone:Optional[str] = None
     domain:str
 
-class UserSignupRequestSchema(BaseModel):
+class UserSigninRequestSchema(BaseModel):
     email: EmailStr
     password: str
 
